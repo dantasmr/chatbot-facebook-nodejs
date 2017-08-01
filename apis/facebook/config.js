@@ -1,6 +1,8 @@
+'use strict';
+
 const bodyParser = require('body-parser');
 
-function config(app) {
+module.exports = function (app) {
   //verify request came from facebook
   app.use(bodyParser.json({
     verify: verifyRequestSignature
@@ -17,16 +19,16 @@ function config(app) {
  *
  */
 function verifyRequestSignature(req, res, buf) {
-  var signature = req.headers["x-hub-signature"];
+  const signature = req.headers["x-hub-signature"];
 
   if (!signature) {
     throw new Error('Couldn\'t validate the signature.');
   } else {
-    var elements = signature.split('=');
-    var method = elements[0];
-    var signatureHash = elements[1];
+    const elements = signature.split('=');
+    const method = elements[0];
+    const signatureHash = elements[1];
 
-    var expectedHash = app.crypto.createHmac('sha1', app.tokens.FB_APP_SECRET)
+    const expectedHash = app.crypto.createHmac('sha1', app.tokens.FB_APP_SECRET)
       .update(buf)
       .digest('hex');
 
@@ -34,9 +36,5 @@ function verifyRequestSignature(req, res, buf) {
       throw new Error("Couldn't validate the request signature.");
     }
   }
-}
-
-module.exports = function () {
-  return config;
 }
 

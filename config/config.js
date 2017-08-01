@@ -5,27 +5,27 @@ const app = express();
 const bodyParser = require('body-parser');
 const consign = require('consign');
 
-module.exports.getapp = function () {
 
-	app.set('port', (process.env.PORT || 5000))
 
-	//serve static files in the public directory
-	app.use(express.static('public'));
+app.set('port', (process.env.PORT || 5000))
 
-	// Process application/x-www-form-urlencoded
-	app.use(bodyParser.urlencoded({
-		extended: false
-	}))
+//serve static files in the public directory
+app.use(express.static('public'));
 
-	// Process application/json
-	app.use(bodyParser.json());
+// Process application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({
+	extended: false
+}))
 
-	consign()
-		.include('./config/tokens.js')
-		.then('apis')
-		.into(app);
+// Process application/json
+app.use(bodyParser.json());
 
-	return app;
+consign()
+	.include('./config/tokens.js')
+	.then('apis')
+	.into(app);
 
-}
+module.exports = app;
+
+
 
