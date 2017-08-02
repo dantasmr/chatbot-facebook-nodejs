@@ -29,19 +29,26 @@ module.exports = function (app) {
     // Make sure this is a page subscription
     if (data.object == 'page') {
 
+      //Hashmap de sessao
+      let sessionIds = new Map();
 
+      //obtendo funcao generica
+      const funcIsDefined = app.config.util.getIsDefined();
+
+      //Tokens de acesso
       const tokenFacePage = app.config.tokens.FB_PAGE_TOKEN;
       const tokenApi_ai = app.config.tokens.API_AI_CLIENT_ACCESS_TOKEN;
 
-
-      let sessionIds = new Map();
-      const facebookSender = new app.apis.facebook.Sender(tokenFacePage, sessionIds);
+      //Classes para gerenciar conversa facebook x api.ai
+      const facebookSender = new app.apis.facebook.Sender(funcIsDefined, tokenFacePage, sessionIds);
       const facebookHandler = new app.apis.facebook.Handler();
       const facebookReceiver = new app.apis.facebook.Receiver();
+      const api_ai = new app.apis.api_ai.Service(funcIsDefined, tokenApi_ai);
 
-      facebookHandler.setFacebookSend(facebookSender);
+      //Relacionando classes para tratar recebimento, envio, api.ai
+      facebookSender.setApiAiService(api_ai);
       facebookSender.setFacebookHandler(facebookHandler);
-      facebookSender.setApi_service(app.apis.api_ai.service(tokenApi_ai));
+      facebookHandler.setFacebookSend(facebookSender);
       facebookReceiver.setSenderHandler(facebookSender, facebookHandler);
 
       // Iterate over each entry
@@ -71,8 +78,6 @@ module.exports = function (app) {
         });
       });
 
-      // Assume all went well.
-      // You must send back a 200, within 20 seconds
       res.sendStatus(200);
     }
   });

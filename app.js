@@ -3,7 +3,7 @@
 const app = require('./config/config');
 
 app.config.tokens.validaTokens(app, function (err) {
-	if (err != null) throw err;
+	if (err) app.config.stop(err.message);
 });
 
 console.log('Servidor ouvindo na porta 5000');

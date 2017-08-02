@@ -1,26 +1,28 @@
 'use strict';
 
 const request = require('request');
-const util = require('./util.js');
+
 
 class Sender {
 
-  constructor(facebookToken, sessionIds) {
+  constructor(funcIsDefined, facebookToken, sessionIds) {
+
+    this.isDefined = funcIsDefined;
     this.facebookToken = facebookToken;
     this.sessionIds = sessionIds;
     this.facebookHandler = null;
-    this.api_service = null;
+    this.api_ai = null;
 
   }
 
-  setFacebookHandler(facebookHandler){
+  setFacebookHandler(facebookHandler) {
     this.facebookHandler = facebookHandler;
   }
 
-  setApi_service(api_service){
-    this.api_service = api_service;
+  setApiAiService(api_ai) {
+    this.api_ai = api_ai;
   }
-  
+
   sendTextMessage(recipientId, text) {
     const messageData = {
       recipient: {
@@ -224,7 +226,7 @@ class Sender {
       },
       message: {
         text: text,
-        metadata: util.isDefined(metadata) ? metadata : '',
+        metadata: this.isDefined(metadata) ? metadata : '',
         quick_replies: replies
       }
     };
@@ -247,20 +249,16 @@ class Sender {
   }
 
   sendToApiAi(sender, text) {
-
     this.sendTypingOn(sender);
-    let apiaiRequest = this.api_service.textRequest(text, {
-      sessionId: this.sessionIds.get(sender)
-    });
-
-    apiaiRequest.on('response', (response) => {
-      console.log(`resposta apiai: ${response.result}`)
-      if (util.isDefined(response.result)) {
-        this.facebookHandler.handleApiAiResponse(sender, response);
+    this.api_ai.sendText(text, this.sessionIds, function (erro, resposta_api) {
+      if (erro) {
+        console.error(erro);
+        this.facebookSender.sendTypingOff(sender);
+        this.facebookSender.sendTextMessage(sender, erro.message);
+      } else {
+        this.facebookHandler.handleApiAiResponse(sender, resposta_api);
       }
     });
-    apiaiRequest.on('error', (error) => console.error(error));
-    apiaiRequest.end();
   }
 
   /*

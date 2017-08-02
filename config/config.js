@@ -5,8 +5,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const consign = require('consign');
 
-
-
 app.set('port', (process.env.PORT || 5000))
 
 //serve static files in the public directory
@@ -22,6 +20,8 @@ app.use(bodyParser.json());
 
 consign()
 	.include('./config/tokens.js')
+	.include('./config/util.js')
+	.include('./config/stop.js')
 	.then('apis')
 	.into(app);
 

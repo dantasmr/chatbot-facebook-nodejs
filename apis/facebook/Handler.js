@@ -1,14 +1,12 @@
 'use strict';
 
-const util = require('./util.js');
-
 class Handler {
 
-constructor(){
-  this.facebookSender = null;
-}
+  constructor() {
+    this.facebookSender = null;
+  }
 
-  setFacebookSend(facebookSender){
+  setFacebookSend(facebookSender) {
     this.facebookSender = facebookSender;
   }
 
@@ -30,11 +28,12 @@ constructor(){
     console.log("Received echo for message %s and app %d with metadata %s", messageId, appId, metadata);
   }
 
-  handleApiAiAction(sender, action, responseText, contexts, parameters) {
-    switch (action) {
+  handleApiAiAction(sender, resposta_api){
+    
+    switch (resposta_api.action) {
       default:
         //unhandled action, just send back the text
-        this.facebookSender.sendTextMessage(sender, responseText);
+        this.facebookSender.sendTextMessage(sender, resposta_api.responseText);
     }
   }
 
@@ -96,8 +95,6 @@ constructor(){
         }
         buttons.push(button);
       }
-
-
       let element = {
         "title": message.title,
         "image_url": message.imageUrl,
@@ -110,69 +107,52 @@ constructor(){
   }
 
 
-  handleApiAiResponse(sender, response) {
-    const responseText = response.result.fulfillment.speech;
-    const responseData = response.result.fulfillment.data;
-    const messages = response.result.fulfillment.messages;
-    const action = response.result.action;
-    const contexts = response.result.contexts;
-    const parameters = response.result.parameters;
+  handleApiAiResponse(sender, resposta_api) {
 
-
-
-    console.log(`responseText: ${responseText}` );
-    console.log(`responseData: ${responseData}` );
-    console.log(`messages: ${messages}` );
-    console.log(`contexts: ${contexts}` );
-    console.log(`action: ${action}` );
-
-
-    this.facebookSender.sendTypingOff(sender);
-
-    if (util.isDefined(messages) && (messages.length == 1 && messages[0].type != 0 || messages.length > 1)) {
-      const timeoutInterval = 1100;
-      let previousType;
-      const cardTypes = [];
-      const timeout = 0;
-      for (let i = 0; i < messages.length; i++) {
-
-        if (previousType == 1 && (messages[i].type != 1 || i == messages.length - 1)) {
-
-          timeout = (i - 1) * timeoutInterval;
-          setTimeout(handleCardMessages.bind(null, cardTypes, sender), timeout);
-          cardTypes = [];
-          timeout = i * timeoutInterval;
-          setTimeout(handleMessage.bind(null, messages[i], sender), timeout);
-        } else if (messages[i].type == 1 && i == messages.length - 1) {
-          cardTypes.push(messages[i]);
-          timeout = (i - 1) * timeoutInterval;
-          setTimeout(handleCardMessages.bind(null, cardTypes, sender), timeout);
-          cardTypes = [];
-        } else if (messages[i].type == 1) {
-          cardTypes.push(messages[i]);
-        } else {
-          timeout = i * timeoutInterval;
-          setTimeout(handleMessage.bind(null, messages[i], sender), timeout);
-        }
-
-        previousType = messages[i].type;
-
-      }
-    } else if (responseText == '' && !util.isDefined(action)) {
-      //api ai could not evaluate input.
-      console.log('Unknown query' + response.result.resolvedQuery);
+    if (resposta_api.type == 'CardMessages') {
+      this.handleApiAiMessages(sender, resposta_api.messages);
+    } else if (resposta_api.type == 'Unknown') {
       this.facebookSender.sendTextMessage(sender, "I'm not sure what you want. Can you be more specific?");
-    } else if (util.isDefined(action)) {
-      handleApiAiAction(sender, action, responseText, contexts, parameters);
-    } else if (util.isDefined(responseData) && util.isDefined(responseData.facebook)) {
+     } else if (resposta_api.type == 'action') {
+      this.handleApiAiAction(sender, resposta_api);
+     } else if (resposta_api.type == 'facebook') {
       try {
-        console.log('Response as formatted message' + responseData.facebook);
-        this.facebookSender.sendTextMessage(sender, responseData.facebook);
+        this.facebookSender.sendTextMessage(sender, resposta_api.facebook);
       } catch (err) {
         this.facebookSender.sendTextMessage(sender, err.message);
       }
-    } else if (util.isDefined(responseText)) {
-      this.facebookSender.sendTextMessage(sender, responseText);
+    } else if (resposta_api.type == 'responseText') {
+      this.facebookSender.sendTextMessage(sender, resposta_api.responseText);
+    }
+  }
+
+  handleApiAiMessages(sender, messages) {
+
+    const timeoutInterval = 1100;
+    let previousType;
+    const cardTypes = [];
+    const timeout = 0;
+    for (let i = 0; i < messages.length; i++) {
+
+      if (previousType == 1 && (messages[i].type != 1 || i == messages.length - 1)) {
+
+        timeout = (i - 1) * timeoutInterval;
+        setTimeout(handleCardMessages.bind(null, cardTypes, sender), timeout);
+        cardTypes = [];
+        timeout = i * timeoutInterval;
+        setTimeout(handleMessage.bind(null, messages[i], sender), timeout);
+      } else if (messages[i].type == 1 && i == messages.length - 1) {
+        cardTypes.push(messages[i]);
+        timeout = (i - 1) * timeoutInterval;
+        setTimeout(handleCardMessages.bind(null, cardTypes, sender), timeout);
+        cardTypes = [];
+      } else if (messages[i].type == 1) {
+        cardTypes.push(messages[i]);
+      } else {
+        timeout = i * timeoutInterval;
+        setTimeout(handleMessage.bind(null, messages[i], sender), timeout);
+      }
+      previousType = messages[i].type;
     }
   }
 }
