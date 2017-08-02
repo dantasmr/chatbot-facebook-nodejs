@@ -1,6 +1,7 @@
 'use strict';
 
 const request = require('request');
+const util = require('./util.js');
 
 class Sender {
 
@@ -223,7 +224,7 @@ class Sender {
       },
       message: {
         text: text,
-        metadata: this.isDefined(metadata) ? metadata : '',
+        metadata: util.isDefined(metadata) ? metadata : '',
         quick_replies: replies
       }
     };
@@ -253,8 +254,8 @@ class Sender {
     });
 
     apiaiRequest.on('response', (response) => {
-      console.log(`resposta apiai: ${response}`)
-      if (this.isDefined(response.result)) {
+      console.log(`resposta apiai: ${response.result}`)
+      if (util.isDefined(response.result)) {
         this.facebookHandler.handleApiAiResponse(sender, response);
       }
     });
@@ -350,18 +351,6 @@ class Sender {
         console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
       }
     });
-  }
-
-  isDefined(obj) {
-    if (typeof obj == 'undefined') {
-      return false;
-    }
-
-    if (!obj) {
-      return false;
-    }
-
-    return obj != null;
   }
 
 }

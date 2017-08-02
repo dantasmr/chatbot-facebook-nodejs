@@ -1,5 +1,7 @@
 'use strict';
 
+const util = require('./util.js');
+
 class Handler {
 
 constructor(){
@@ -116,9 +118,18 @@ constructor(){
     const contexts = response.result.contexts;
     const parameters = response.result.parameters;
 
+
+
+    console.log(`responseText: ${responseText}` );
+    console.log(`responseData: ${responseData}` );
+    console.log(`messages: ${messages}` );
+    console.log(`contexts: ${contexts}` );
+    console.log(`action: ${action}` );
+
+
     this.facebookSender.sendTypingOff(sender);
 
-    if (this.isDefined(messages) && (messages.length == 1 && messages[0].type != 0 || messages.length > 1)) {
+    if (util.isDefined(messages) && (messages.length == 1 && messages[0].type != 0 || messages.length > 1)) {
       const timeoutInterval = 1100;
       let previousType;
       const cardTypes = [];
@@ -147,37 +158,23 @@ constructor(){
         previousType = messages[i].type;
 
       }
-    } else if (responseText == '' && !this.isDefined(action)) {
+    } else if (responseText == '' && !util.isDefined(action)) {
       //api ai could not evaluate input.
       console.log('Unknown query' + response.result.resolvedQuery);
       this.facebookSender.sendTextMessage(sender, "I'm not sure what you want. Can you be more specific?");
-    } else if (this.isDefined(action)) {
+    } else if (util.isDefined(action)) {
       handleApiAiAction(sender, action, responseText, contexts, parameters);
-    } else if (this.isDefined(responseData) && this.isDefined(responseData.facebook)) {
+    } else if (util.isDefined(responseData) && util.isDefined(responseData.facebook)) {
       try {
         console.log('Response as formatted message' + responseData.facebook);
         this.facebookSender.sendTextMessage(sender, responseData.facebook);
       } catch (err) {
         this.facebookSender.sendTextMessage(sender, err.message);
       }
-    } else if (this.isDefined(responseText)) {
+    } else if (util.isDefined(responseText)) {
       this.facebookSender.sendTextMessage(sender, responseText);
     }
   }
-
-
-  isDefined(obj) {
-    if (typeof obj == 'undefined') {
-      return false;
-    }
-
-    if (!obj) {
-      return false;
-    }
-
-    return obj != null;
-  }
-
 }
 
 module.exports = function () {
