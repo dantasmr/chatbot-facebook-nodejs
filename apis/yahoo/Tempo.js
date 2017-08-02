@@ -1,6 +1,6 @@
 const request = require('request');
 
-class PrevisaoTempo {
+class Tempo {
 
     constructor(funcContains, cidade, estado) {
 
@@ -61,5 +61,5 @@ function extrairPrevisao(itens) {
 }
 
 module.exports = function () {
-    return PrevisaoTempo;
+    return Tempo;
 }

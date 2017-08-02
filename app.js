@@ -12,10 +12,23 @@ app.set('port', (process.env.PORT || 5000))
 
 app.get('/tempo', (req, res) => {
 	const funcIsContains = app.config.util.getIsContainsKeyJson;
-	const previsao = new app.apis.yahoo.PrevisaoTempo(funcIsContains, 'Sao paulo', 'sp');
-	previsao.getPrevisao((err, tempo) => {
+	const tempo = new app.apis.yahoo.Tempo(funcIsContains, 'Sao paulo', 'sp');
+	tempo.getPrevisao((err, previsao) => {
 		if (!err) {
-			res.json(tempo)
+			res.json(previsao)
+		} else {
+			res.status(404).json(err)
+		}
+
+	})
+});
+
+app.get('/cotacao', (req, res) => {
+	const funcIsContains = app.config.util.getIsContainsKeyJson;
+	const cotacao = new app.apis.yahoo.Cotacao(funcIsContains);
+	cotacao.getCotacao((err, cotacoes) => {
+		if (!err) {
+			res.json(cotacoes)
 		} else {
 			res.status(404).json(err)
 		}
