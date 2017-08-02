@@ -2,20 +2,24 @@
 
 class Handler {
 
-  constructor(facebookSend) {
-    this.facebookSend = facebookSend;
+constructor(){
+  this.facebookSender = null;
+}
+
+  setFacebookSend(facebookSender){
+    this.facebookSender = facebookSender;
   }
 
   handleMessageAttachments(messageAttachments, senderID) {
     //for now just reply
-    this.facebookSend.sendTextMessage(senderID, "Attachment received. Thank you.");
+    this.facebookSender.sendTextMessage(senderID, "Attachment received. Thank you.");
   }
 
   handleQuickReply(senderID, quickReply, messageId) {
     const quickReplyPayload = quickReply.payload;
     console.log("Quick reply for message %s with payload %s", messageId, quickReplyPayload);
     //send payload to api.ai
-    this.facebookSend.sendToApiAi(senderID, quickReplyPayload);
+    this.facebookSender.sendToApiAi(senderID, quickReplyPayload);
   }
 
   //https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-echo
@@ -28,30 +32,29 @@ class Handler {
     switch (action) {
       default:
         //unhandled action, just send back the text
-        this.facebookSend.sendTextMessage(sender, responseText);
+        this.facebookSender.sendTextMessage(sender, responseText);
     }
   }
 
   handleMessage(message, sender) {
     switch (message.type) {
       case 0: //text
-        this.facebookSend.sendTextMessage(sender, message.speech);
+        this.facebookSender.sendTextMessage(sender, message.speech);
         break;
       case 2: //quick replies
         let replies = [];
         for (var b = 0; b < message.replies.length; b++) {
-          let reply =
-            {
-              "content_type": "text",
-              "title": message.replies[b],
-              "payload": message.replies[b]
-            }
+          let reply = {
+            "content_type": "text",
+            "title": message.replies[b],
+            "payload": message.replies[b]
+          }
           replies.push(reply);
         }
-        this.facebookSend.sendQuickReply(sender, message.title, replies);
+        this.facebookSender.sendQuickReply(sender, message.title, replies);
         break;
       case 3: //image
-        this.facebookSend.sendImageMessage(sender, message.imageUrl);
+        this.facebookSender.sendImageMessage(sender, message.imageUrl);
         break;
       case 4:
         // custom payload
@@ -62,7 +65,7 @@ class Handler {
           message: message.payload.facebook
 
         };
-        this.facebookSend.callSendAPI(messageData);
+        this.facebookSender.callSendAPI(messageData);
         break;
     }
   }
@@ -101,7 +104,7 @@ class Handler {
       };
       elements.push(element);
     }
-    this.facebookSend.sendGenericMessage(sender, elements);
+    this.facebookSender.sendGenericMessage(sender, elements);
   }
 
 
@@ -113,7 +116,7 @@ class Handler {
     const contexts = response.result.contexts;
     const parameters = response.result.parameters;
 
-    this.facebookSend.sendTypingOff(sender);
+    this.facebookSender.sendTypingOff(sender);
 
     if (this.isDefined(messages) && (messages.length == 1 && messages[0].type != 0 || messages.length > 1)) {
       const timeoutInterval = 1100;
@@ -147,18 +150,18 @@ class Handler {
     } else if (responseText == '' && !isDefined(action)) {
       //api ai could not evaluate input.
       console.log('Unknown query' + response.result.resolvedQuery);
-      this.facebookSend.sendTextMessage(sender, "I'm not sure what you want. Can you be more specific?");
+      this.facebookSender.sendTextMessage(sender, "I'm not sure what you want. Can you be more specific?");
     } else if (isDefined(action)) {
       handleApiAiAction(sender, action, responseText, contexts, parameters);
     } else if (isDefined(responseData) && isDefined(responseData.facebook)) {
       try {
         console.log('Response as formatted message' + responseData.facebook);
-        this.facebookSend.sendTextMessage(sender, responseData.facebook);
+        this.facebookSender.sendTextMessage(sender, responseData.facebook);
       } catch (err) {
-        this.facebookSend.sendTextMessage(sender, err.message);
+        this.facebookSender.sendTextMessage(sender, err.message);
       }
     } else if (isDefined(responseText)) {
-      this.facebookSend.sendTextMessage(sender, responseText);
+      this.facebookSender.sendTextMessage(sender, responseText);
     }
   }
 
@@ -178,5 +181,5 @@ class Handler {
 }
 
 module.exports = function () {
-    return Handler;
-} 
+  return Handler;
+}

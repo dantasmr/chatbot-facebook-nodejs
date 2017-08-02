@@ -1,10 +1,13 @@
 const apiai = require('apiai');
 
-module.exports =  function(app) {
-  const apiAiService = apiai(app.config.tokens.API_AI_CLIENT_ACCESS_TOKEN, {
+function service (api_ai_token) {
+  const apiAiService = apiai(api_ai_token, {
     language: "pt-BR",
     requestSource: "fb"
   });
   return apiAiService;
 }
 
+module.exports = function(){
+  return service;
+}

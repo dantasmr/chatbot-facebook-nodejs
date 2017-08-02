@@ -1,12 +1,19 @@
 'use strict';
 
+const uuid = require('uuid');
+
 class Receiver {
 
-  constructor(facebookSend, facebookHandle) {
-    this.facebookSend = facebookSend;
-    this.facebookHandle = facebookHandle;
-    this.sessionIds = new Map();
-  }
+constructor(){
+  this.facebookSender = null;
+  this.facebookHandler = null;
+}
+
+setSenderHandler(facebookSender, facebookHandler){
+  this.facebookSender = facebookSender;
+  this.facebookHandler = facebookHandler;
+}
+
   /*
    * Authorization Event
    *
@@ -34,19 +41,19 @@ class Receiver {
 
     // When an authentication is received, we'll send a message back to the sender
     // to let them know it was successful.
-    this.facebookSend.sendTextMessage(senderID, "Authentication successful");
+    this.facebookSender.sendTextMessage(senderID, "Authentication successful");
   }
 
 
-  receivedMessage(event) {
+  receivedMessage(event, sessionIds) {
 
     const senderID = event.sender.id;
     const recipientID = event.recipient.id;
     const timeOfMessage = event.timestamp;
     const message = event.message;
 
-    if (!this.sessionIds.has(senderID)) {
-      this.sessionIds.set(senderID, uuid.v1());
+    if (!sessionIds.has(senderID)) {
+      sessionIds.set(senderID, uuid.v1());
     }
     //console.log("Received message for user %d and page %d at %d with message:", senderID, recipientID, timeOfMessage);
     //console.log(JSON.stringify(message));
@@ -62,19 +69,19 @@ class Receiver {
     const quickReply = message.quick_reply;
 
     if (isEcho) {
-      this.facebookHandle.handleEcho(messageId, appId, metadata);
+      this.facebookHandler.handleEcho(messageId, appId, metadata);
       return;
     } else if (quickReply) {
-      this.facebookHandle.handleQuickReply(senderID, quickReply, messageId);
+      this.facebookHandler.handleQuickReply(senderID, quickReply, messageId);
       return;
     }
 
 
     if (messageText) {
       //send message to api.ai
-      this.facebookSend.sendToApiAi(senderID, messageText);
+      this.facebookSender.sendToApiAi(senderID, messageText);
     } else if (messageAttachments) {
-      this.facebookHandle.handleMessageAttachments(messageAttachments, senderID);
+      this.facebookHandler.handleMessageAttachments(messageAttachments, senderID);
     }
   }
 
@@ -124,7 +131,7 @@ class Receiver {
     switch (payload) {
       default:
         //unindentified payload
-        this.facebookSend.sendTextMessage(senderID, "I'm not sure what you want. Can you be more specific?");
+        facebookSender.sendTextMessage(senderID, "I'm not sure what you want. Can you be more specific?");
       break;
 
     }

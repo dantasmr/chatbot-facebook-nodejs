@@ -20,36 +20,51 @@ module.exports = function (app) {
    * https://developers.facebook.com/docs/messenger-platform/product-overview/setup#subscribe_app
    *
    */
+
   app.post('/webhook/', function (req, res) {
+
     var data = req.body;
     console.log(JSON.stringify(data));
-    
-     const facebookSend = new app.apis.facebook.Sender();
-     const facebookHandle = new app.apis.facebook.Handler(facebookSend);
-     const facebookReceive = new app.apis.facebook.Receiver(facebookSend, facebookHandle);
 
     // Make sure this is a page subscription
     if (data.object == 'page') {
+
+
+      const tokenFacePage = app.config.tokens.FB_PAGE_TOKEN;
+      const tokenApi_ai = app.config.tokens.API_AI_CLIENT_ACCESS_TOKEN;
+
+
+      let sessionIds = new Map();
+      const facebookSender = new app.apis.facebook.Sender(sessionIds);
+      const facebookHandler = new app.apis.facebook.Handler();
+      const facebookReceiver = new app.apis.facebook.Receiver();
+
+      facebookHandler.setFacebookSend(facebookSender);
+      facebookSender.setFacebookHandler(facebookHandler);
+      facebookSender.setApi_service(app.apis.api_ai.service(tokenApi_ai));
+      facebookReceiver.setSenderHandler(facebookSender, facebookHandler);
+
       // Iterate over each entry
       // There may be multiple if batched
       data.entry.forEach(function (pageEntry) {
+
         var pageID = pageEntry.id;
         var timeOfEvent = pageEntry.time;
 
         // Iterate over each messaging event
         pageEntry.messaging.forEach(function (messagingEvent) {
           if (messagingEvent.optin) {
-            facebookReceive.receivedAuthentication(messagingEvent);
+            facebookReceiver.receivedAuthentication(messagingEvent);
           } else if (messagingEvent.message) {
-            facebookReceive.receivedMessage(messagingEvent);
+            facebookReceiver.receivedMessage(messagingEvent, sessionIds);
           } else if (messagingEvent.delivery) {
-            facebookReceive.receivedDeliveryConfirmation(messagingEvent);
+            facebookReceiver.receivedDeliveryConfirmation(messagingEvent);
           } else if (messagingEvent.postback) {
-            facebookReceive.receivedPostback(messagingEvent);
+            facebookReceiver.receivedPostback(messagingEvent);
           } else if (messagingEvent.read) {
-            facebookReceive.receivedMessageRead(messagingEvent);
+            facebookReceiver.receivedMessageRead(messagingEvent);
           } else if (messagingEvent.account_linking) {
-            facebookReceive.receivedAccountLink(messagingEvent);
+            facebookReceiver.receivedAccountLink(messagingEvent);
           } else {
             console.log("Webhook received unknown messagingEvent: ", messagingEvent);
           }
@@ -61,5 +76,4 @@ module.exports = function (app) {
       res.sendStatus(200);
     }
   });
-
 }

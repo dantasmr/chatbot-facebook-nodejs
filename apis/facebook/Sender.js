@@ -1,8 +1,24 @@
-
 'use strict';
+
+const request = require('request');
 
 class Sender {
 
+  constructor(sessionIds) {
+    this.sessionIds = sessionIds;
+    this.facebookHandler = null;
+    this.api_service = null;
+
+  }
+
+  setFacebookHandler(facebookHandler){
+    this.facebookHandler = facebookHandler;
+  }
+
+  setApi_service(api_service){
+    this.api_service = api_service;
+  }
+  
   sendTextMessage(recipientId, text) {
     const messageData = {
       recipient: {
@@ -12,7 +28,7 @@ class Sender {
         text: text
       }
     }
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -33,7 +49,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -54,7 +70,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -75,7 +91,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -96,7 +112,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -117,7 +133,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
 
@@ -142,7 +158,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
 
@@ -161,7 +177,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
 
@@ -192,7 +208,7 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -206,11 +222,11 @@ class Sender {
       },
       message: {
         text: text,
-        metadata: isDefined(metadata) ? metadata : '',
+        metadata: this.isDefined(metadata) ? metadata : '',
         quick_replies: replies
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -225,20 +241,20 @@ class Sender {
       },
       sender_action: "mark_seen"
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   sendToApiAi(sender, text) {
 
-    sendTypingOn(sender);
-    const api_service = require('../api_ai/service');
-    let apiaiRequest = api_service.textRequest(text, {
-      sessionId: sessionIds.get(sender)
+    this.sendTypingOn(sender);
+    let apiaiRequest = this.api_service.textRequest(text, {
+      sessionId: this.sessionIds.get(sender)
     });
 
     apiaiRequest.on('response', (response) => {
-      if (isDefined(response.result)) {
-        handleApiAiResponse(sender, response);
+      console.log(`resposta apiai: ${response}`)
+      if (this.isDefined(response.result)) {
+        this.facebookHandler.handleApiAiResponse(sender, response);
       }
     });
     apiaiRequest.on('error', (error) => console.error(error));
@@ -257,7 +273,7 @@ class Sender {
       },
       sender_action: "typing_on"
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
@@ -272,7 +288,7 @@ class Sender {
       },
       sender_action: "typing_off"
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
 
@@ -299,20 +315,20 @@ class Sender {
         }
       }
     };
-    callSendAPI(messageData);
+    this.callSendAPI(messageData);
   }
 
   /*
-* Call the Send API. The message data goes in the body. If successful, we'll 
-* get the message id in a response 
-*
-*/
+   * Call the Send API. The message data goes in the body. If successful, we'll 
+   * get the message id in a response 
+   *
+   */
 
   callSendAPI(messageData) {
     request({
       uri: 'https://graph.facebook.com/v2.6/me/messages',
       qs: {
-        access_token: config.FB_PAGE_TOKEN
+        access_token: this.facebookToken
       },
       method: 'POST',
       json: messageData
@@ -334,9 +350,21 @@ class Sender {
       }
     });
   }
+
+  isDefined(obj) {
+    if (typeof obj == 'undefined') {
+      return false;
+    }
+
+    if (!obj) {
+      return false;
+    }
+
+    return obj != null;
+  }
+
 }
 
-module.exports = function (){
-  return  Sender;
+module.exports = function () {
+  return Sender;
 }
-
