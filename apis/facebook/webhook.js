@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function (app) {
+module.exports.valida = function (app) {
 
   // for Facebook verification
   app.get('/webhook/', function (req, res) {

@@ -14,3 +14,16 @@ function isDefined(obj) {
   return obj != null;
 
 }
+
+module.exports.getIsContainsKeyJson = function(){
+  return _isContains;
+}
+
+function _isContains(json, value) {
+    let contains = false;
+    Object.keys(json).some(key => {
+        contains = typeof json[key] === 'object' ? _isContains(json[key], value) : json[key] === value;
+         return contains;
+    });
+    return contains;
+ }
