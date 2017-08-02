@@ -147,20 +147,20 @@ constructor(){
         previousType = messages[i].type;
 
       }
-    } else if (responseText == '' && !isDefined(action)) {
+    } else if (responseText == '' && !this.isDefined(action)) {
       //api ai could not evaluate input.
       console.log('Unknown query' + response.result.resolvedQuery);
       this.facebookSender.sendTextMessage(sender, "I'm not sure what you want. Can you be more specific?");
-    } else if (isDefined(action)) {
+    } else if (this.isDefined(action)) {
       handleApiAiAction(sender, action, responseText, contexts, parameters);
-    } else if (isDefined(responseData) && isDefined(responseData.facebook)) {
+    } else if (this.isDefined(responseData) && this.isDefined(responseData.facebook)) {
       try {
         console.log('Response as formatted message' + responseData.facebook);
         this.facebookSender.sendTextMessage(sender, responseData.facebook);
       } catch (err) {
         this.facebookSender.sendTextMessage(sender, err.message);
       }
-    } else if (isDefined(responseText)) {
+    } else if (this.isDefined(responseText)) {
       this.facebookSender.sendTextMessage(sender, responseText);
     }
   }

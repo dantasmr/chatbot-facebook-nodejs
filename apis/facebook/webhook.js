@@ -35,7 +35,7 @@ module.exports = function (app) {
 
 
       let sessionIds = new Map();
-      const facebookSender = new app.apis.facebook.Sender(sessionIds);
+      const facebookSender = new app.apis.facebook.Sender(tokenFacePage, sessionIds);
       const facebookHandler = new app.apis.facebook.Handler();
       const facebookReceiver = new app.apis.facebook.Receiver();
 

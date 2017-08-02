@@ -8,7 +8,7 @@ module.exports = function (app) {
     verify: verifyRequestSignature
   }));
 
-}
+
 
 /*
  * Verify that the callback came from Facebook. Using the App Secret from 
@@ -28,7 +28,7 @@ function verifyRequestSignature(req, res, buf) {
     const method = elements[0];
     const signatureHash = elements[1];
 
-    const expectedHash = app.crypto.createHmac('sha1', app.tokens.FB_APP_SECRET)
+    const expectedHash = app.crypto.createHmac('sha1', app.config.tokens.FB_APP_SECRET)
       .update(buf)
       .digest('hex');
 
@@ -37,4 +37,4 @@ function verifyRequestSignature(req, res, buf) {
     }
   }
 }
-
+}

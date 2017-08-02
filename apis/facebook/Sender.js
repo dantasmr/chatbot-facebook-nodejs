@@ -4,7 +4,8 @@ const request = require('request');
 
 class Sender {
 
-  constructor(sessionIds) {
+  constructor(facebookToken, sessionIds) {
+    this.facebookToken = facebookToken;
     this.sessionIds = sessionIds;
     this.facebookHandler = null;
     this.api_service = null;
