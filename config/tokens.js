@@ -1,6 +1,6 @@
 module.exports = {
-
-};
+  FB_PAGE_TOKEN: 
+}
 
 module.exports.validaTokens = function (app, callback) {
   
