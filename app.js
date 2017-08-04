@@ -53,8 +53,7 @@ app.get('/sqlcode', (req, res) => {
 
 	const google_token = app.config.tokens.GOOGLE_TOKEN;
 	const google_cx = app.config.tokens.GOOGLE_CX_SQLCODE_TOKEN;
-	const funcIsContains = app.config.util.getIsContainsKeyJson;
-	const sqlcode = new app.apis.google.SQLCODE(funcIsContains, google_token, google_cx, "100");
+	const sqlcode = new app.apis.google.Pesquisa(google_token, google_cx, "904");
 	sqlcode.find((err, descricao) => {
 		if (!err) {
 			res.status(200).json(descricao);
@@ -64,6 +63,21 @@ app.get('/sqlcode', (req, res) => {
 	});
 });
 
+app.get('/git', (req, res) => {
+	
+		const google_token = app.config.tokens.GOOGLE_TOKEN;
+		const google_cx = app.config.tokens.GOOGLE_CX_GIT_TOKEN;
+		const funcIsContains = app.config.util.getIsContainsKeyJson;
+		const sqlcode = new app.apis.google.SQLCODE(funcIsContains, google_token, google_cx, "'git add'");
+		sqlcode.find((err, descricao) => {
+			if (!err) {
+				res.status(200).json(descricao);
+			} else {
+				res.status(404).json(err);
+			}
+		});
+	});
+	
 
 
 // Spin up the server
