@@ -11,9 +11,9 @@ app.set('port', (process.env.PORT || 5000))
 
 
 app.get('/tempo', (req, res) => {
-	const funcIsContains = app.config.util.getIsContainsKeyJson;
-	const tempo = new app.apis.yahoo.Tempo(funcIsContains, 'Sao paulo', 'sp');
-	tempo.getPrevisao((err, previsao) => {
+	
+	const tempo = new app.apis.yahoo.Tempo();
+	tempo.getPrevisao('Sao paulo', 'sp', (err, previsao) => {
 		if (!err) {
 			res.json(previsao)
 		} else {
@@ -24,8 +24,8 @@ app.get('/tempo', (req, res) => {
 });
 
 app.get('/cotacao', (req, res) => {
-	const funcIsContains = app.config.util.getIsContainsKeyJson;
-	const cotacao = new app.apis.yahoo.Cotacao(funcIsContains);
+
+	const cotacao = new app.apis.yahoo.Cotacao();
 	cotacao.getCotacao((err, cotacoes) => {
 		if (!err) {
 			res.json(cotacoes)
@@ -62,6 +62,42 @@ app.get('/sqlcode', (req, res) => {
 		}
 	});
 });
+
+
+app.get('/cep/:cep', (req, res) => {
+	
+		const cep = new app.apis.correios.CEP();
+		cep.find(req.params.cep, (err, descricao) => {
+			if (!err) {
+				res.status(200).json(descricao);
+			} else {
+				res.status(404).json(err);
+			}
+		});
+	});
+	app.get('/summary/:assunto', (req, res) => {
+		
+			const wikipedia = new app.apis.wikipedia.Summary();
+			wikipedia.find(req.params.assunto, (err, texto, img_url) => {
+				if (!err) {
+					res.status(200).json(texto + img_url);
+				} else {
+					res.status(404).json(err);
+				}
+			});
+		});
+
+	app.get('/megasena/:concurso', (req, res) => {
+		
+			const megasena = new app.apis.loteria.MegaSena();
+			megasena.find(req.params.concurso, (err, descricao) => {
+				if (!err) {
+					res.status(200).json(descricao);
+				} else {
+					res.status(404).json(err);
+				}
+			});
+		});
 
 app.get('/git', (req, res) => {
 	

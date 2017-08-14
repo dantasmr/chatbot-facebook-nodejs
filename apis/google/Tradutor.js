@@ -1,8 +1,15 @@
 // Imports the Google Cloud client library
 const Translate = require('@google-cloud/translate');
 
+/**
+ * @class
+ */
 class Tradutor {
-
+  /**
+   * @constructor
+   * @param  {String} projectId id do projeto google
+   * @param  {String} token_api_google id token api google
+   */
   constructor(projectId, token_api_google) {
 
     // Instantiates a client
@@ -13,15 +20,11 @@ class Tradutor {
 
   }
 
-  // The text to translate, e.g. "Hello, world!"
-  // const text = 'Hello, world!';
-
-  // The target language, e.g. "ru"
-  // const target = 'ru';
-
-  // The model to use, e.g. "nmt"
-  // const model = 'nmt';
-
+  /**
+   * @param  {String} texto - Texto a ser traduzido
+   * @param  {String} idioma - Idioma destino da tranducao 
+   * @param  {requestCallback} cb - CallBack Resposta 
+   */
   traduzir(texto, idioma, callback) {
 
     // Translates the text into the target language. "text" can be a string for
@@ -35,10 +38,7 @@ class Tradutor {
     }
 
     let options = {
-      // The target language, e.g. "ru"
       to: idioma,
-      // Make sure your project is whitelisted.
-      // Possible values are "base" and "nmt"
       model: 'nmt'
     };
 
@@ -51,6 +51,13 @@ class Tradutor {
         callback(err, texto)
       });
   }
+
+/**
+ * This callback is displayed as a global member.
+ * @callback requestCallback
+ * @param {err} Erro - Erro em caso de erro de execucao
+ * @param {string} textoTraduzido - Resultado da transcao 
+ */
 }
 
 module.exports = function () {
